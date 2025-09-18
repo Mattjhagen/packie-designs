@@ -151,7 +151,7 @@ Update the contact details in the contact section of `index.html`.
 
 ## Support
 
-For technical support or customization requests, please contact [your-email@example.com].
+For technical support or customization requests, please contact [matty@pacmacmobile.com].
 
 ## License
 
