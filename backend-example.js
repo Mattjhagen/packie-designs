@@ -10,7 +10,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: ['https://mattjhagen.github.io', 'https://packie-designs.onrender.com'],
+    credentials: true
+}));
 app.use(express.json());
 
 // Environment variables (set these in your .env file)
@@ -239,6 +242,15 @@ app.get('/api/pricing', (req, res) => {
 // Health check endpoint
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// Test endpoint for frontend
+app.get('/api/test', (req, res) => {
+    res.json({ 
+        message: 'Backend is working!', 
+        timestamp: new Date().toISOString(),
+        frontend: 'https://mattjhagen.github.io/packie-designs/'
+    });
 });
 
 // Error handling middleware

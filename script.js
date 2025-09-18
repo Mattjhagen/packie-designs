@@ -7,7 +7,7 @@ const CONFIG = {
     STRIPE_PUBLISHABLE_KEY: 'pk_test_your_stripe_publishable_key_here',
     DYNADOT_API_KEY: 'your_dynadot_api_key_here',
     DYNADOT_API_URL: 'https://api.dynadot.com/api3.json',
-    BACKEND_URL: 'https://your-backend-url.com/api', // Your backend for handling payments
+    BACKEND_URL: 'https://packie-designs.onrender.com/api', // Your backend for handling payments
     COMMISSION_RATE: 0.15 // 15% commission on domain sales
 };
 
