@@ -1,10 +1,10 @@
 // Initialize Stripe (replace with your publishable key)
-const stripe = Stripe('pk_test_your_stripe_publishable_key_here');
+const stripe = Stripe('pk_test_your_actual_stripe_publishable_key_here');
 
 // Configuration
 const CONFIG = {
     // Replace with your actual API keys and endpoints
-    STRIPE_PUBLISHABLE_KEY: 'pk_test_your_stripe_publishable_key_here',
+    STRIPE_PUBLISHABLE_KEY: 'pk_test_your_actual_stripe_publishable_key_here',
     DYNADOT_API_KEY: 'your_dynadot_api_key_here',
     DYNADOT_API_URL: 'https://api.dynadot.com/api3.json',
     BACKEND_URL: 'https://packie-designs.onrender.com/api', // Your backend for handling payments
