@@ -273,14 +273,7 @@ section {
     transition: transform 0.3s ease;
 }
 
-.portfolio-image img:not([src]),
-.portfolio-image img[src=""],
-.portfolio-image img[src*="placeholder"] {
-    display: none;
-}
-
-.portfolio-image::before {
-    content: '';
+.portfolio-fallback {
     position: absolute;
     top: 0;
     left: 0;
@@ -292,24 +285,7 @@ section {
     justify-content: center;
     color: white;
     font-size: 3rem;
-    opacity: 0.8;
-}
-
-.portfolio-image.show-fallback::before {
-    display: flex;
-}
-
-.portfolio-image.show-fallback::after {
-    content: attr(data-icon);
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: 'Font Awesome 6 Free';
-    font-weight: 900;
-    font-size: 3rem;
-    color: white;
-    z-index: 1;
+    opacity: 0.9;
 }
 
 .portfolio-overlay {

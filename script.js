@@ -173,18 +173,27 @@ function initializePortfolioImages() {
     portfolioImages.forEach(img => {
         // Check if image loads successfully
         img.addEventListener('load', function() {
-            this.parentElement.classList.remove('show-fallback');
+            const fallback = this.nextElementSibling;
+            if (fallback && fallback.classList.contains('portfolio-fallback')) {
+                fallback.style.display = 'none';
+            }
         });
         
         img.addEventListener('error', function() {
             this.style.display = 'none';
-            this.parentElement.classList.add('show-fallback');
+            const fallback = this.nextElementSibling;
+            if (fallback && fallback.classList.contains('portfolio-fallback')) {
+                fallback.style.display = 'flex';
+            }
         });
         
         // If image src is empty or invalid, show fallback immediately
-        if (!img.src || img.src.includes('placeholder') || img.src.endsWith('.jpg') && !img.complete) {
+        if (!img.src || img.src.includes('placeholder') || img.src.endsWith('.jpg')) {
             img.style.display = 'none';
-            img.parentElement.classList.add('show-fallback');
+            const fallback = img.nextElementSibling;
+            if (fallback && fallback.classList.contains('portfolio-fallback')) {
+                fallback.style.display = 'flex';
+            }
         }
     });
 }
