@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeContactForm();
     initializeModals();
     initializeDomainSearch();
+    initializePortfolioImages();
 });
 
 // Navigation functionality
@@ -161,6 +162,29 @@ function initializeModals() {
             document.querySelectorAll('.modal').forEach(modal => {
                 modal.style.display = 'none';
             });
+        }
+    });
+}
+
+// Portfolio images functionality
+function initializePortfolioImages() {
+    const portfolioImages = document.querySelectorAll('.portfolio-image img');
+    
+    portfolioImages.forEach(img => {
+        // Check if image loads successfully
+        img.addEventListener('load', function() {
+            this.parentElement.classList.remove('show-fallback');
+        });
+        
+        img.addEventListener('error', function() {
+            this.style.display = 'none';
+            this.parentElement.classList.add('show-fallback');
+        });
+        
+        // If image src is empty or invalid, show fallback immediately
+        if (!img.src || img.src.includes('placeholder') || img.src.endsWith('.jpg') && !img.complete) {
+            img.style.display = 'none';
+            img.parentElement.classList.add('show-fallback');
         }
     });
 }
