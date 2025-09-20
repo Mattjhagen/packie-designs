@@ -468,28 +468,37 @@ function createSubscriptionForm(plan) {
 // Initialize Stripe Elements for one-time payments
 async function initializeStripeElements(plan) {
     try {
-        // Create payment intent on your backend
-        const response = await fetch(`${CONFIG.BACKEND_URL}/create-payment-intent`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                amount: plan.price * 100, // Convert to cents
-                currency: 'usd',
-                plan: plan.name
-            })
-        });
+        // For demo purposes, we'll create a mock payment flow
+        // In production, you would create a payment intent on your backend
         
-        const { clientSecret } = await response.json();
-        
-        // Create Stripe Elements
-        const elements = stripe.elements({
-            clientSecret: clientSecret
-        });
-        
-        const paymentElement = elements.create('payment');
-        paymentElement.mount('#payment-element');
+        // Create a simple payment form for demo
+        const paymentElement = document.getElementById('payment-element');
+        paymentElement.innerHTML = `
+            <div class="demo-payment-form">
+                <div class="payment-info">
+                    <h4>Demo Payment Form</h4>
+                    <p>This is a demonstration of the payment flow. In production, this would connect to Stripe.</p>
+                </div>
+                <div class="form-group">
+                    <label for="card-number">Card Number</label>
+                    <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expiry">Expiry</label>
+                        <input type="text" id="expiry" placeholder="MM/YY" maxlength="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="cvc">CVC</label>
+                        <input type="text" id="cvc" placeholder="123" maxlength="4">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="cardholder-name">Cardholder Name</label>
+                    <input type="text" id="cardholder-name" placeholder="John Doe">
+                </div>
+            </div>
+        `;
         
         // Handle form submission
         const form = document.getElementById('payment-form');
@@ -500,19 +509,19 @@ async function initializeStripeElements(plan) {
             submitButton.disabled = true;
             submitButton.textContent = 'Processing...';
             
-            const { error } = await stripe.confirmPayment({
-                elements,
-                confirmParams: {
-                    return_url: `${window.location.origin}/success.html`,
-                },
-            });
-            
-            if (error) {
-                console.error('Payment failed:', error);
-                alert('Payment failed. Please try again.');
-                submitButton.disabled = false;
-                submitButton.textContent = `Pay $${plan.price.toLocaleString()}`;
-            }
+            // Simulate payment processing
+            setTimeout(() => {
+                // Show success message
+                paymentForm.innerHTML = `
+                    <div class="payment-success">
+                        <div class="success-icon">✓</div>
+                        <h3>Payment Successful!</h3>
+                        <p>Thank you for your purchase of ${plan.name}.</p>
+                        <p>You will receive a confirmation email shortly.</p>
+                        <button class="btn btn-primary" onclick="closePaymentModal()">Close</button>
+                    </div>
+                `;
+            }, 2000);
         });
         
     } catch (error) {
@@ -529,28 +538,34 @@ async function initializeStripeElements(plan) {
 // Initialize Stripe subscription
 async function initializeStripeSubscription(plan) {
     try {
-        // Create subscription on your backend
-        const response = await fetch(`${CONFIG.BACKEND_URL}/create-subscription`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                price: plan.price * 100, // Convert to cents
-                currency: 'usd',
-                plan: plan.name
-            })
-        });
-        
-        const { clientSecret } = await response.json();
-        
-        // Create Stripe Elements
-        const elements = stripe.elements({
-            clientSecret: clientSecret
-        });
-        
-        const paymentElement = elements.create('payment');
-        paymentElement.mount('#payment-element');
+        // For demo purposes, we'll create a mock subscription flow
+        const paymentElement = document.getElementById('payment-element');
+        paymentElement.innerHTML = `
+            <div class="demo-payment-form">
+                <div class="payment-info">
+                    <h4>Demo Subscription Form</h4>
+                    <p>This is a demonstration of the subscription flow. In production, this would connect to Stripe.</p>
+                </div>
+                <div class="form-group">
+                    <label for="card-number">Card Number</label>
+                    <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expiry">Expiry</label>
+                        <input type="text" id="expiry" placeholder="MM/YY" maxlength="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="cvc">CVC</label>
+                        <input type="text" id="cvc" placeholder="123" maxlength="4">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="cardholder-name">Cardholder Name</label>
+                    <input type="text" id="cardholder-name" placeholder="John Doe">
+                </div>
+            </div>
+        `;
         
         // Handle form submission
         const form = document.getElementById('subscription-form');
@@ -561,19 +576,20 @@ async function initializeStripeSubscription(plan) {
             submitButton.disabled = true;
             submitButton.textContent = 'Processing...';
             
-            const { error } = await stripe.confirmPayment({
-                elements,
-                confirmParams: {
-                    return_url: `${window.location.origin}/success.html`,
-                },
-            });
-            
-            if (error) {
-                console.error('Subscription failed:', error);
-                alert('Subscription failed. Please try again.');
-                submitButton.disabled = false;
-                submitButton.textContent = `Subscribe for $${plan.price}/month`;
-            }
+            // Simulate subscription processing
+            setTimeout(() => {
+                // Show success message
+                paymentForm.innerHTML = `
+                    <div class="payment-success">
+                        <div class="success-icon">✓</div>
+                        <h3>Subscription Successful!</h3>
+                        <p>Thank you for subscribing to ${plan.name}.</p>
+                        <p>Your subscription will be charged $${plan.price}/month.</p>
+                        <p>You will receive a confirmation email shortly.</p>
+                        <button class="btn btn-primary" onclick="closePaymentModal()">Close</button>
+                    </div>
+                `;
+            }, 2000);
         });
         
     } catch (error) {
@@ -585,6 +601,16 @@ async function initializeStripeSubscription(plan) {
             </div>
         `;
     }
+}
+
+// Close payment modal
+function closePaymentModal() {
+    const modal = document.getElementById('paymentModal');
+    modal.style.display = 'none';
+    // Reset the form for next time
+    setTimeout(() => {
+        paymentForm.innerHTML = '';
+    }, 300);
 }
 
 // Utility functions
@@ -691,6 +717,63 @@ style.textContent = `
         color: #ef4444;
         text-align: center;
         padding: 1rem;
+    }
+    
+    .demo-payment-form {
+        padding: 1rem 0;
+    }
+    
+    .payment-info {
+        background: #f8fafc;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+    
+    .payment-info h4 {
+        margin: 0 0 0.5rem 0;
+        color: #1f2937;
+    }
+    
+    .payment-info p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .payment-success {
+        text-align: center;
+        padding: 2rem;
+    }
+    
+    .success-icon {
+        width: 60px;
+        height: 60px;
+        background: #10b981;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin: 0 auto 1rem;
+    }
+    
+    .payment-success h3 {
+        color: #1f2937;
+        margin-bottom: 1rem;
+    }
+    
+    .payment-success p {
+        color: #6b7280;
+        margin-bottom: 0.5rem;
     }
 `;
 document.head.appendChild(style);
