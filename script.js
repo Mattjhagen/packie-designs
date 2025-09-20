@@ -5,7 +5,9 @@ const CONFIG = {
     DYNADOT_API_KEY: '8z9R6Z7D8i8JF84LE7P8g7j9J9W706n9R9F6YRa7E7X',
     DYNADOT_API_URL: 'https://storefront457991568429.gdg.website',
     BACKEND_URL: 'https://packie-designs.onrender.com/api', // Render backend for production
-    COMMISSION_RATE: 0.15 // 15% commission on domain sales
+    COMMISSION_RATE: 0.15, // 15% commission on domain sales
+    // Base URL for return URLs - use production URL for Stripe compatibility
+    BASE_URL: 'https://www.cmameet.site'
 };
 
 // Initialize Stripe (replace with your publishable key)
@@ -549,7 +551,7 @@ async function initializeDomainPayment(domainName, price) {
                 const { error } = await stripe.confirmPayment({
                     elements,
                     confirmParams: {
-                        return_url: `${window.location.origin}/success.html?domain=${encodeURIComponent(domainName)}`,
+                        return_url: `${CONFIG.BASE_URL}/success.html?domain=${encodeURIComponent(domainName)}`,
                     },
                 });
                 
@@ -738,7 +740,7 @@ async function initializeStripeElements(plan) {
             const { error } = await stripe.confirmPayment({
                 elements,
                 confirmParams: {
-                    return_url: `${window.location.origin}/esign.html`,
+                    return_url: `${CONFIG.BASE_URL}/esign.html`,
                 },
             });
             
@@ -851,7 +853,7 @@ async function initializeStripeSubscription(plan) {
             const { error } = await stripe.confirmPayment({
                 elements,
                 confirmParams: {
-                    return_url: `${window.location.origin}/esign.html`,
+                    return_url: `${CONFIG.BASE_URL}/esign.html`,
                 },
             });
             
