@@ -1,13 +1,13 @@
 // Initialize Stripe (replace with your publishable key)
-const stripe = Stripe('pk_test_your_actual_stripe_publishable_key_here');
+const stripe = Stripe(CONFIG.STRIPE_PUBLISHABLE_KEY);
 
 // Configuration
 const CONFIG = {
-    // Replace with your actual API keys and endpoints
-    STRIPE_PUBLISHABLE_KEY: 'pk_test_your_actual_stripe_publishable_key_here',
+    // Replace with your actual Stripe publishable key
+    STRIPE_PUBLISHABLE_KEY: 'pk_test_51Q...', // Replace with your actual key
     DYNADOT_API_KEY: 'your_dynadot_api_key_here',
     DYNADOT_API_URL: 'https://api.dynadot.com/api3.json',
-    BACKEND_URL: 'https://packie-designs.onrender.com/api', // Your backend for handling payments
+    BACKEND_URL: 'http://localhost:3001/api', // Local backend for development
     COMMISSION_RATE: 0.15 // 15% commission on domain sales
 };
 
@@ -468,37 +468,32 @@ function createSubscriptionForm(plan) {
 // Initialize Stripe Elements for one-time payments
 async function initializeStripeElements(plan) {
     try {
-        // For demo purposes, we'll create a mock payment flow
-        // In production, you would create a payment intent on your backend
+        // Create payment intent on your backend
+        const response = await fetch(`${CONFIG.BACKEND_URL}/create-payment-intent`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                amount: plan.price * 100, // Convert to cents
+                currency: 'usd',
+                plan: plan.name
+            })
+        });
         
-        // Create a simple payment form for demo
-        const paymentElement = document.getElementById('payment-element');
-        paymentElement.innerHTML = `
-            <div class="demo-payment-form">
-                <div class="payment-info">
-                    <h4>Demo Payment Form</h4>
-                    <p>This is a demonstration of the payment flow. In production, this would connect to Stripe.</p>
-                </div>
-                <div class="form-group">
-                    <label for="card-number">Card Number</label>
-                    <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="expiry">Expiry</label>
-                        <input type="text" id="expiry" placeholder="MM/YY" maxlength="5">
-                    </div>
-                    <div class="form-group">
-                        <label for="cvc">CVC</label>
-                        <input type="text" id="cvc" placeholder="123" maxlength="4">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="cardholder-name">Cardholder Name</label>
-                    <input type="text" id="cardholder-name" placeholder="John Doe">
-                </div>
-            </div>
-        `;
+        if (!response.ok) {
+            throw new Error('Failed to create payment intent');
+        }
+        
+        const { clientSecret } = await response.json();
+        
+        // Create Stripe Elements
+        const elements = stripe.elements({
+            clientSecret: clientSecret
+        });
+        
+        const paymentElement = elements.create('payment');
+        paymentElement.mount('#payment-element');
         
         // Handle form submission
         const form = document.getElementById('payment-form');
@@ -509,19 +504,19 @@ async function initializeStripeElements(plan) {
             submitButton.disabled = true;
             submitButton.textContent = 'Processing...';
             
-            // Simulate payment processing
-            setTimeout(() => {
-                // Show success message
-                paymentForm.innerHTML = `
-                    <div class="payment-success">
-                        <div class="success-icon">✓</div>
-                        <h3>Payment Successful!</h3>
-                        <p>Thank you for your purchase of ${plan.name}.</p>
-                        <p>You will receive a confirmation email shortly.</p>
-                        <button class="btn btn-primary" onclick="closePaymentModal()">Close</button>
-                    </div>
-                `;
-            }, 2000);
+            const { error } = await stripe.confirmPayment({
+                elements,
+                confirmParams: {
+                    return_url: `${window.location.origin}/success.html`,
+                },
+            });
+            
+            if (error) {
+                console.error('Payment failed:', error);
+                alert('Payment failed. Please try again.');
+                submitButton.disabled = false;
+                submitButton.textContent = `Pay $${plan.price.toLocaleString()}`;
+            }
         });
         
     } catch (error) {
@@ -529,7 +524,7 @@ async function initializeStripeElements(plan) {
         paymentForm.innerHTML = `
             <div class="error">
                 <p>Error initializing payment. Please try again.</p>
-                <p>Note: This is a demo. In production, you would need to set up a backend to handle Stripe payments.</p>
+                <p>Make sure the backend server is running on port 3001.</p>
             </div>
         `;
     }
