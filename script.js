@@ -55,6 +55,11 @@ const domainResults = document.getElementById('domainResults');
 const domainNameInput = document.getElementById('domainName');
 const checkDomainBtn = document.getElementById('checkDomain');
 
+// Inline domain search elements
+const inlineDomainNameInput = document.getElementById('inlineDomainName');
+const inlineCheckDomainBtn = document.getElementById('inlineCheckDomain');
+const inlineDomainResults = document.getElementById('inlineDomainResults');
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     initializeNavigation();
@@ -62,6 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeContactForm();
     initializeModals();
     initializeDomainSearch();
+    initializeInlineDomainSearch();
     initializePortfolioImages();
 });
 
@@ -69,6 +75,100 @@ document.addEventListener('DOMContentLoaded', function() {
 function openDomainModal() {
     domainModal.style.display = 'block';
     document.body.style.overflow = 'hidden';
+}
+
+// Initialize inline domain search
+function initializeInlineDomainSearch() {
+    if (inlineCheckDomainBtn) {
+        inlineCheckDomainBtn.addEventListener('click', function() {
+            const domainName = inlineDomainNameInput.value.trim();
+            
+            if (!domainName) {
+                alert('Please enter a domain name');
+                return;
+            }
+            
+            // Validate domain format
+            const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}$/;
+            if (!domainRegex.test(domainName)) {
+                alert('Please enter a valid domain name (e.g., example.com)');
+                return;
+            }
+            
+            checkInlineDomainAvailability(domainName);
+        });
+    }
+    
+    // Allow Enter key to trigger domain check
+    if (inlineDomainNameInput) {
+        inlineDomainNameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                inlineCheckDomainBtn.click();
+            }
+        });
+    }
+}
+
+// Check domain availability for inline search
+async function checkInlineDomainAvailability(domainName) {
+    const resultsDiv = inlineDomainResults;
+    
+    // Show loading state
+    resultsDiv.innerHTML = '<div class="domain-result-inline"><p><i class="fas fa-spinner fa-spin"></i> Checking domain availability...</p></div>';
+    
+    try {
+        const response = await fetch(`${CONFIG.BACKEND_URL}/check-domain`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                domain: domainName,
+                apiKey: CONFIG.DYNADOT_API_KEY
+            })
+        });
+        
+        const data = await response.json();
+        displayInlineDomainResults(data);
+        
+    } catch (error) {
+        console.error('Error checking domain:', error);
+        resultsDiv.innerHTML = `
+            <div class="domain-result-inline unavailable">
+                <h4>❌ Error checking domain</h4>
+                <p>Error checking domain availability. Please try again.</p>
+            </div>
+        `;
+    }
+}
+
+// Display inline domain search results
+function displayInlineDomainResults(data) {
+    const resultsDiv = inlineDomainResults;
+    
+    if (data.available) {
+        const price = data.price || 'Contact for pricing';
+        resultsDiv.innerHTML = `
+            <div class="domain-result-inline available">
+                <h4>✅ ${data.domain} is available!</h4>
+                <div class="domain-details-inline">
+                    <p><strong>Domain:</strong> ${data.domain}</p>
+                    <p><strong>Price:</strong> <span class="price">$${price}</span> ${data.currency || 'USD'}</p>
+                    <p><strong>Status:</strong> Available for registration</p>
+                </div>
+                <button class="btn btn-primary" onclick="purchaseDomain('${data.domain}', ${price})" style="margin-top: 1rem;">
+                    <i class="fas fa-shopping-cart"></i> Purchase Domain
+                </button>
+            </div>
+        `;
+    } else {
+        resultsDiv.innerHTML = `
+            <div class="domain-result-inline unavailable">
+                <h4>❌ ${data.domain} is not available</h4>
+                <p>This domain is already registered. Try searching for a different domain name.</p>
+            </div>
+        `;
+    }
 }
 
 // Navigation functionality

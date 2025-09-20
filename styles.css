@@ -345,6 +345,148 @@ section {
     border: 2px solid #6366f1;
 }
 
+/* Domain Search Section */
+.domain-search-section {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+}
+
+.domain-search-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.domain-search-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.domain-search-header h3 {
+    color: #1e293b;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.domain-search-header h3 i {
+    color: #6366f1;
+}
+
+.domain-search-header p {
+    color: #64748b;
+    font-size: 1rem;
+}
+
+.domain-search-form {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.domain-input-group {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.domain-input-group input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.domain-input-group input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.domain-input-group button {
+    padding: 0.75rem 1.5rem;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.domain-results-inline {
+    min-height: 60px;
+}
+
+.domain-result-inline {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 1px solid #e2e8f0;
+}
+
+.domain-result-inline.available {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-color: #22c55e;
+}
+
+.domain-result-inline.unavailable {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-color: #ef4444;
+}
+
+.domain-result-inline h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.domain-result-inline p {
+    margin: 0;
+    color: #64748b;
+}
+
+.domain-details-inline {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.domain-details-inline p {
+    margin: 0.25rem 0;
+    font-weight: 500;
+}
+
+.domain-details-inline .price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #059669;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .domain-input-group {
+        flex-direction: column;
+    }
+    
+    .domain-input-group button {
+        justify-content: center;
+    }
+    
+    .domain-search-section {
+        margin-top: 2rem;
+        padding: 1.5rem;
+    }
+    
+    .domain-search-form {
+        padding: 1.5rem;
+    }
+}
+
 .service-icon {
     width: 80px;
     height: 80px;
