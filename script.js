@@ -169,7 +169,33 @@ function initializeModals() {
 // Portfolio images functionality
 function initializePortfolioImages() {
     const portfolioImages = document.querySelectorAll('.portfolio-image img');
+    const portfolioPreviews = document.querySelectorAll('.portfolio-preview');
     
+    // Handle iframe previews
+    portfolioPreviews.forEach(iframe => {
+        iframe.addEventListener('load', function() {
+            const fallback = this.nextElementSibling;
+            if (fallback && fallback.classList.contains('portfolio-fallback')) {
+                fallback.style.display = 'none';
+            }
+        });
+        
+        iframe.addEventListener('error', function() {
+            this.style.display = 'none';
+            const fallback = this.nextElementSibling;
+            if (fallback && fallback.classList.contains('portfolio-fallback')) {
+                fallback.style.display = 'flex';
+            }
+        });
+        
+        // Show fallback initially, hide when iframe loads
+        const fallback = iframe.nextElementSibling;
+        if (fallback && fallback.classList.contains('portfolio-fallback')) {
+            fallback.style.display = 'flex';
+        }
+    });
+    
+    // Handle image fallbacks (for backward compatibility)
     portfolioImages.forEach(img => {
         // Check if image loads successfully
         img.addEventListener('load', function() {
