@@ -182,6 +182,9 @@ function initializePortfolioImages() {
     portfolioPreviews.forEach(iframe => {
         let hasLoaded = false;
         
+        // Check if this is a known problematic site (P3 Lending)
+        const isProblematicSite = iframe.src.includes('p3lend.netlify.app');
+        
         iframe.addEventListener('load', function() {
             hasLoaded = true;
             const fallback = this.nextElementSibling;
@@ -204,27 +207,52 @@ function initializePortfolioImages() {
             fallback.style.display = 'flex';
         }
         
-        // Check if iframe loaded properly after 3 seconds
-        setTimeout(() => {
-            if (!hasLoaded) {
-                // Check if iframe is still blank (common with X-Frame-Options)
-                try {
-                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                    if (!iframeDoc || iframeDoc.body.innerHTML.trim() === '') {
+        // For problematic sites, show fallback immediately
+        if (isProblematicSite) {
+            iframe.style.display = 'none';
+            if (fallback && fallback.classList.contains('portfolio-fallback')) {
+                fallback.style.display = 'flex';
+            }
+        } else {
+            // Check if iframe loaded properly after 2 seconds
+            setTimeout(() => {
+                if (!hasLoaded) {
+                    // Check if iframe is still blank (common with X-Frame-Options)
+                    try {
+                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        if (!iframeDoc || iframeDoc.body.innerHTML.trim() === '') {
+                            iframe.style.display = 'none';
+                            if (fallback && fallback.classList.contains('portfolio-fallback')) {
+                                fallback.style.display = 'flex';
+                            }
+                        }
+                    } catch (e) {
+                        // Cross-origin restrictions - show fallback
                         iframe.style.display = 'none';
                         if (fallback && fallback.classList.contains('portfolio-fallback')) {
                             fallback.style.display = 'flex';
                         }
                     }
-                } catch (e) {
-                    // Cross-origin restrictions - show fallback
-                    iframe.style.display = 'none';
-                    if (fallback && fallback.classList.contains('portfolio-fallback')) {
-                        fallback.style.display = 'flex';
+                } else {
+                    // Even if loaded, check if content is actually visible
+                    try {
+                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        if (iframeDoc && iframeDoc.body.innerHTML.trim() === '') {
+                            iframe.style.display = 'none';
+                            if (fallback && fallback.classList.contains('portfolio-fallback')) {
+                                fallback.style.display = 'flex';
+                            }
+                        }
+                    } catch (e) {
+                        // Cross-origin restrictions - show fallback
+                        iframe.style.display = 'none';
+                        if (fallback && fallback.classList.contains('portfolio-fallback')) {
+                            fallback.style.display = 'flex';
+                        }
                     }
                 }
-            }
-        }, 3000);
+            }, 2000);
+        }
     });
     
     // Handle image fallbacks (for backward compatibility)
