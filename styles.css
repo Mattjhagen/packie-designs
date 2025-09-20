@@ -410,16 +410,16 @@ section {
     transition: transform 0.3s ease;
 }
 
-.portfolio-preview {
+.portfolio-screenshot {
     width: 100%;
     height: 100%;
-    border: none;
+    object-fit: cover;
     border-radius: 8px;
-    background: #f8fafc;
     transition: transform 0.3s ease;
-    transform: scale(0.8);
-    transform-origin: top left;
-    pointer-events: none;
+}
+
+.portfolio-screenshot:hover {
+    transform: scale(1.02);
 }
 
 .portfolio-fallback {

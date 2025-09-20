@@ -176,24 +176,18 @@ function initializeModals() {
 // Portfolio images functionality
 function initializePortfolioImages() {
     const portfolioImages = document.querySelectorAll('.portfolio-image img');
-    const portfolioPreviews = document.querySelectorAll('.portfolio-preview');
+    const portfolioScreenshots = document.querySelectorAll('.portfolio-screenshot');
     
-    // Handle iframe previews
-    portfolioPreviews.forEach(iframe => {
-        let hasLoaded = false;
-        
-        // Check if this is a known problematic site (P3 Lending)
-        const isProblematicSite = iframe.src.includes('p3lend.netlify.app');
-        
-        iframe.addEventListener('load', function() {
-            hasLoaded = true;
+    // Handle screenshot images
+    portfolioScreenshots.forEach(img => {
+        img.addEventListener('load', function() {
             const fallback = this.nextElementSibling;
             if (fallback && fallback.classList.contains('portfolio-fallback')) {
                 fallback.style.display = 'none';
             }
         });
         
-        iframe.addEventListener('error', function() {
+        img.addEventListener('error', function() {
             this.style.display = 'none';
             const fallback = this.nextElementSibling;
             if (fallback && fallback.classList.contains('portfolio-fallback')) {
@@ -201,57 +195,10 @@ function initializePortfolioImages() {
             }
         });
         
-        // Show fallback initially, hide when iframe loads
-        const fallback = iframe.nextElementSibling;
+        // Show fallback initially, hide when image loads
+        const fallback = img.nextElementSibling;
         if (fallback && fallback.classList.contains('portfolio-fallback')) {
             fallback.style.display = 'flex';
-        }
-        
-        // For problematic sites, show fallback immediately
-        if (isProblematicSite) {
-            iframe.style.display = 'none';
-            if (fallback && fallback.classList.contains('portfolio-fallback')) {
-                fallback.style.display = 'flex';
-            }
-        } else {
-            // Check if iframe loaded properly after 2 seconds
-            setTimeout(() => {
-                if (!hasLoaded) {
-                    // Check if iframe is still blank (common with X-Frame-Options)
-                    try {
-                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                        if (!iframeDoc || iframeDoc.body.innerHTML.trim() === '') {
-                            iframe.style.display = 'none';
-                            if (fallback && fallback.classList.contains('portfolio-fallback')) {
-                                fallback.style.display = 'flex';
-                            }
-                        }
-                    } catch (e) {
-                        // Cross-origin restrictions - show fallback
-                        iframe.style.display = 'none';
-                        if (fallback && fallback.classList.contains('portfolio-fallback')) {
-                            fallback.style.display = 'flex';
-                        }
-                    }
-                } else {
-                    // Even if loaded, check if content is actually visible
-                    try {
-                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                        if (iframeDoc && iframeDoc.body.innerHTML.trim() === '') {
-                            iframe.style.display = 'none';
-                            if (fallback && fallback.classList.contains('portfolio-fallback')) {
-                                fallback.style.display = 'flex';
-                            }
-                        }
-                    } catch (e) {
-                        // Cross-origin restrictions - show fallback
-                        iframe.style.display = 'none';
-                        if (fallback && fallback.classList.contains('portfolio-fallback')) {
-                            fallback.style.display = 'flex';
-                        }
-                    }
-                }
-            }, 2000);
         }
     });
     
