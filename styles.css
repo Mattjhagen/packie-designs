@@ -131,19 +131,24 @@ body {
 .brace-left,
 .brace-right {
     font-size: 4rem;
-    font-weight: 300;
-    color: #3b82f6;
+    font-weight: 400;
+    color: #60a5fa;
     text-shadow: 
-        0 0 10px rgba(59, 130, 246, 0.8),
-        0 0 20px rgba(59, 130, 246, 0.6),
-        0 0 30px rgba(59, 130, 246, 0.4);
+        0 0 10px rgba(96, 165, 250, 0.8),
+        0 0 20px rgba(96, 165, 250, 0.6),
+        0 0 30px rgba(96, 165, 250, 0.4);
     animation: glow-pulse 2s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 6px rgba(96, 165, 250, 0.6));
 }
 
 .logo-v {
     font-size: 4rem;
-    font-weight: 700;
-    color: #3b82f6;
+    font-weight: 900;
+    color: #ffffff;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     text-shadow: 
         0 0 10px rgba(59, 130, 246, 0.8),
         0 0 20px rgba(59, 130, 246, 0.6),
@@ -151,6 +156,7 @@ body {
         0 0 40px rgba(59, 130, 246, 0.2);
     animation: glow-pulse 2s ease-in-out infinite alternate;
     position: relative;
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.8));
 }
 
 .logo-v::before {
@@ -161,10 +167,24 @@ body {
     transform: translate(-50%, -50%);
     width: 120%;
     height: 120%;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 50%, transparent 70%);
     border-radius: 50%;
     z-index: -1;
     animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.logo-v::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 80%;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    z-index: -2;
+    backdrop-filter: blur(2px);
 }
 
 .logo-text {
@@ -182,6 +202,7 @@ body {
             0 0 10px rgba(59, 130, 246, 0.8),
             0 0 20px rgba(59, 130, 246, 0.6),
             0 0 30px rgba(59, 130, 246, 0.4);
+        filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.8));
     }
     100% {
         text-shadow: 
@@ -189,6 +210,7 @@ body {
             0 0 25px rgba(59, 130, 246, 0.8),
             0 0 35px rgba(59, 130, 246, 0.6),
             0 0 45px rgba(59, 130, 246, 0.4);
+        filter: drop-shadow(0 0 12px rgba(59, 130, 246, 1));
     }
 }
 
