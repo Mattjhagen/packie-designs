@@ -65,6 +65,12 @@ document.addEventListener('DOMContentLoaded', function() {
     initializePortfolioImages();
 });
 
+// Open domain modal
+function openDomainModal() {
+    domainModal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
 // Navigation functionality
 function initializeNavigation() {
     const hamburger = document.querySelector('.hamburger');
