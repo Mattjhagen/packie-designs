@@ -432,8 +432,19 @@ function displayDomainResults(data) {
 // Purchase domain
 async function purchaseDomain(domainName, price) {
     try {
-        // Show payment modal for domain purchase
-        showDomainPaymentModal(domainName, price);
+        // Close domain modal if it's open
+        if (domainModal && domainModal.style.display === 'block') {
+            domainModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            
+            // Small delay to ensure smooth transition
+            setTimeout(() => {
+                showDomainPaymentModal(domainName, price);
+            }, 100);
+        } else {
+            // Show payment modal immediately if no domain modal is open
+            showDomainPaymentModal(domainName, price);
+        }
         
     } catch (error) {
         console.error('Error purchasing domain:', error);
