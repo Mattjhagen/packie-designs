@@ -1,10 +1,10 @@
 // Configuration
 const CONFIG = {
     // Replace with your actual Stripe publishable key
-    STRIPE_PUBLISHABLE_KEY: 'pk_test_51Q...', // Replace with your actual key
-    DYNADOT_API_KEY: 'your_dynadot_api_key_here',
-    DYNADOT_API_URL: 'https://api.dynadot.com/api3.json',
-    BACKEND_URL: 'http://localhost:3001/api', // Local backend for development
+    STRIPE_PUBLISHABLE_KEY: 'pk_live_51RgRBRG6ZGE2Rl3oAODxJMejteYv858nAPO5OkhMycDqT1zRIhnYnT47KAt4EaWAev2QKeQbIM6YVfXEpkJxXz7B0080qNWNbM', // Live Stripe publishable key
+    DYNADOT_API_KEY: '8z9R6Z7D8i8JF84LE7P8g7j9J9W706n9R9F6YRa7E7X',
+    DYNADOT_API_URL: 'https://storefront457991568429.gdg.website',
+    BACKEND_URL: 'https://packie-designs.onrender.com/api', // Render backend for production
     COMMISSION_RATE: 0.15 // 15% commission on domain sales
 };
 
