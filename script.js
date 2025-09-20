@@ -519,7 +519,7 @@ async function initializeStripeElements(plan) {
             const { error } = await stripe.confirmPayment({
                 elements,
                 confirmParams: {
-                    return_url: `${window.location.origin}/success.html`,
+                    return_url: `${window.location.origin}/esign.html`,
                 },
             });
             
@@ -579,16 +579,8 @@ function showDemoPaymentForm(plan) {
         
         // Simulate payment processing
         setTimeout(() => {
-            // Show success message
-            paymentForm.innerHTML = `
-                <div class="payment-success">
-                    <div class="success-icon">✓</div>
-                    <h3>Payment Successful!</h3>
-                    <p>Thank you for your purchase of ${plan.name}.</p>
-                    <p>You will receive a confirmation email shortly.</p>
-                    <button class="btn btn-primary" onclick="closePaymentModal()">Close</button>
-                </div>
-            `;
+            // Redirect to e-signature form
+            window.location.href = 'esign.html';
         }, 2000);
     });
 }
@@ -640,7 +632,7 @@ async function initializeStripeSubscription(plan) {
             const { error } = await stripe.confirmPayment({
                 elements,
                 confirmParams: {
-                    return_url: `${window.location.origin}/success.html`,
+                    return_url: `${window.location.origin}/esign.html`,
                 },
             });
             
@@ -700,17 +692,8 @@ function showDemoSubscriptionForm(plan) {
         
         // Simulate subscription processing
         setTimeout(() => {
-            // Show success message
-            paymentForm.innerHTML = `
-                <div class="payment-success">
-                    <div class="success-icon">✓</div>
-                    <h3>Subscription Successful!</h3>
-                    <p>Thank you for subscribing to ${plan.name}.</p>
-                    <p>Your subscription will be charged $${plan.price}/month.</p>
-                    <p>You will receive a confirmation email shortly.</p>
-                    <button class="btn btn-primary" onclick="closePaymentModal()">Close</button>
-                </div>
-            `;
+            // Redirect to e-signature form
+            window.location.href = 'esign.html';
         }, 2000);
     });
 }
