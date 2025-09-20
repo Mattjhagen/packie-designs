@@ -870,5 +870,40 @@ style.textContent = `
         color: #6b7280;
         margin-bottom: 0.5rem;
     }
+    
+    /* Payment Modal Scrolling */
+    .modal-content {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .modal-content h2 {
+        flex-shrink: 0;
+        margin-bottom: 1rem;
+    }
+    
+    .modal-content form {
+        flex: 1;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+    
+    .modal-content form::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .modal-content form::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+    
+    .modal-content form::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+    
+    .modal-content form::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
 `;
 document.head.appendChild(style);

@@ -807,13 +807,16 @@ section {
 
 .modal-content {
     background-color: white;
-    margin: 5% auto;
+    margin: 2% auto;
     padding: 2rem;
     border-radius: 12px;
     width: 90%;
     max-width: 500px;
+    max-height: 90vh;
     position: relative;
     animation: modalSlideIn 0.3s ease;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 @keyframes modalSlideIn {
@@ -931,9 +934,10 @@ section {
     }
 
     .modal-content {
-        margin: 10% auto;
+        margin: 5% auto;
         width: 95%;
         padding: 1.5rem;
+        max-height: 85vh;
     }
 }
 
