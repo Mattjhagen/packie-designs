@@ -180,7 +180,10 @@ function initializePortfolioImages() {
     
     // Handle iframe previews
     portfolioPreviews.forEach(iframe => {
+        let hasLoaded = false;
+        
         iframe.addEventListener('load', function() {
+            hasLoaded = true;
             const fallback = this.nextElementSibling;
             if (fallback && fallback.classList.contains('portfolio-fallback')) {
                 fallback.style.display = 'none';
@@ -200,6 +203,28 @@ function initializePortfolioImages() {
         if (fallback && fallback.classList.contains('portfolio-fallback')) {
             fallback.style.display = 'flex';
         }
+        
+        // Check if iframe loaded properly after 3 seconds
+        setTimeout(() => {
+            if (!hasLoaded) {
+                // Check if iframe is still blank (common with X-Frame-Options)
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    if (!iframeDoc || iframeDoc.body.innerHTML.trim() === '') {
+                        iframe.style.display = 'none';
+                        if (fallback && fallback.classList.contains('portfolio-fallback')) {
+                            fallback.style.display = 'flex';
+                        }
+                    }
+                } catch (e) {
+                    // Cross-origin restrictions - show fallback
+                    iframe.style.display = 'none';
+                    if (fallback && fallback.classList.contains('portfolio-fallback')) {
+                        fallback.style.display = 'flex';
+                    }
+                }
+            }
+        }, 3000);
     });
     
     // Handle image fallbacks (for backward compatibility)
