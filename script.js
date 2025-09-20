@@ -432,7 +432,57 @@ function displayDomainResults(data) {
 // Purchase domain
 async function purchaseDomain(domainName, price) {
     try {
-        // Create a payment intent for domain purchase
+        // Show payment modal for domain purchase
+        showDomainPaymentModal(domainName, price);
+        
+    } catch (error) {
+        console.error('Error purchasing domain:', error);
+        alert('Error purchasing domain. Please try again.');
+    }
+}
+
+// Show domain payment modal
+function showDomainPaymentModal(domainName, price) {
+    // Update modal title and content
+    const modal = document.getElementById('paymentModal');
+    const modalTitle = modal.querySelector('h2');
+    const paymentForm = document.getElementById('paymentForm');
+    
+    modalTitle.textContent = `Purchase Domain: ${domainName}`;
+    
+    // Create domain payment form
+    paymentForm.innerHTML = `
+        <div class="domain-purchase-info">
+            <div class="purchase-item">
+                <h4>Domain Registration</h4>
+                <p><strong>Domain:</strong> ${domainName}</p>
+                <p><strong>Price:</strong> $${price}</p>
+                <p><strong>Commission (15%):</strong> $${(price * CONFIG.COMMISSION_RATE).toFixed(2)}</p>
+                <hr>
+                <p class="total-price"><strong>Total: $${(price + (price * CONFIG.COMMISSION_RATE)).toFixed(2)}</strong></p>
+            </div>
+        </div>
+        <div id="domainPaymentForm">
+            <!-- Stripe payment form will be loaded here -->
+        </div>
+    `;
+    
+    // Show modal
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    
+    // Initialize Stripe payment for domain
+    initializeDomainPayment(domainName, price);
+}
+
+// Initialize domain payment with Stripe
+async function initializeDomainPayment(domainName, price) {
+    try {
+        if (!stripe) {
+            throw new Error('Stripe not initialized');
+        }
+        
+        // Create payment intent for domain purchase
         const response = await fetch(`${CONFIG.BACKEND_URL}/create-domain-payment`, {
             method: 'POST',
             headers: {
@@ -441,28 +491,80 @@ async function purchaseDomain(domainName, price) {
             body: JSON.stringify({
                 domain: domainName,
                 price: price,
-                commission: price * CONFIG.COMMISSION_RATE
+                currency: 'usd'
             })
         });
         
-        const { clientSecret } = await response.json();
-        
-        // Confirm payment with Stripe
-        const { error } = await stripe.confirmPayment({
-            elements,
-            confirmParams: {
-                return_url: `${window.location.origin}/success.html`,
-            },
-        });
-        
-        if (error) {
-            console.error('Payment failed:', error);
-            alert('Payment failed. Please try again.');
+        if (!response.ok) {
+            throw new Error('Failed to create payment intent');
         }
         
+        const { clientSecret } = await response.json();
+        
+        // Create Stripe Elements
+        const elements = stripe.elements({
+            clientSecret: clientSecret,
+            appearance: {
+                theme: 'stripe',
+                variables: {
+                    colorPrimary: '#6366f1',
+                }
+            }
+        });
+        
+        // Create payment element
+        const paymentElement = elements.create('payment');
+        paymentElement.mount('#domainPaymentForm');
+        
+        // Handle form submission
+        const form = document.createElement('form');
+        form.id = 'domainPaymentFormElement';
+        form.innerHTML = `
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                <i class="fas fa-credit-card"></i> Complete Purchase - $${(price + (price * CONFIG.COMMISSION_RATE)).toFixed(2)}
+            </button>
+        `;
+        
+        document.getElementById('domainPaymentForm').appendChild(form);
+        
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            const submitButton = form.querySelector('button');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            
+            try {
+                const { error } = await stripe.confirmPayment({
+                    elements,
+                    confirmParams: {
+                        return_url: `${window.location.origin}/success.html?domain=${encodeURIComponent(domainName)}`,
+                    },
+                });
+                
+                if (error) {
+                    console.error('Payment failed:', error);
+                    alert(`Payment failed: ${error.message}`);
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<i class="fas fa-credit-card"></i> Complete Purchase';
+                }
+                
+            } catch (error) {
+                console.error('Payment error:', error);
+                alert('Payment error. Please try again.');
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="fas fa-credit-card"></i> Complete Purchase';
+            }
+        });
+        
     } catch (error) {
-        console.error('Error purchasing domain:', error);
-        alert('Error purchasing domain. Please try again.');
+        console.error('Error initializing domain payment:', error);
+        document.getElementById('domainPaymentForm').innerHTML = `
+            <div class="error-message">
+                <p><i class="fas fa-exclamation-triangle"></i> Error setting up payment. Please try again.</p>
+                <button class="btn btn-secondary" onclick="document.getElementById('paymentModal').style.display='none'">Close</button>
+            </div>
+        `;
     }
 }
 
