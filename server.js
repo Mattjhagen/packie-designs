@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { checkDomainAvailability } = require('./dynadot-integration');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -95,6 +96,53 @@ app.post('/api/webhook', express.raw({type: 'application/json'}), (req, res) => 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'Stripe payment server is running' });
+});
+
+// Status endpoint
+app.get('/api/status', (req, res) => {
+    res.json({ status: 'OK', message: 'Stripe payment server is running' });
+});
+
+// Check domain availability using Dynadot API
+app.post('/api/check-domain', async (req, res) => {
+    try {
+        const { domain } = req.body;
+        
+        if (!domain) {
+            return res.status(400).json({ error: 'Domain name is required' });
+        }
+
+        // Use the real Dynadot API integration
+        const result = await checkDomainAvailability(domain);
+        res.json(result);
+        
+    } catch (error) {
+        console.error('Error checking domain:', error);
+        res.status(500).json({ error: 'Error checking domain availability' });
+    }
+});
+
+// Create domain purchase payment intent
+app.post('/api/create-domain-payment', async (req, res) => {
+    try {
+        const { domain, price, currency = 'usd' } = req.body;
+        
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: Math.round(price * 100), // Convert to cents
+            currency: currency,
+            metadata: {
+                type: 'domain_purchase',
+                domain: domain
+            }
+        });
+
+        res.json({
+            clientSecret: paymentIntent.client_secret
+        });
+    } catch (error) {
+        console.error('Error creating domain payment intent:', error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 app.listen(PORT, () => {
