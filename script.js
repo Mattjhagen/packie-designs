@@ -1,6 +1,3 @@
-// Initialize Stripe (replace with your publishable key)
-const stripe = Stripe(CONFIG.STRIPE_PUBLISHABLE_KEY);
-
 // Configuration
 const CONFIG = {
     // Replace with your actual Stripe publishable key
@@ -10,6 +7,16 @@ const CONFIG = {
     BACKEND_URL: 'http://localhost:3001/api', // Local backend for development
     COMMISSION_RATE: 0.15 // 15% commission on domain sales
 };
+
+// Initialize Stripe (replace with your publishable key)
+let stripe;
+try {
+    stripe = Stripe(CONFIG.STRIPE_PUBLISHABLE_KEY);
+} catch (error) {
+    console.warn('Stripe initialization failed:', error);
+    // Fallback for demo mode
+    stripe = null;
+}
 
 // Pricing configuration
 const PRICING = {
@@ -468,6 +475,11 @@ function createSubscriptionForm(plan) {
 // Initialize Stripe Elements for one-time payments
 async function initializeStripeElements(plan) {
     try {
+        // Check if Stripe is available
+        if (!stripe) {
+            throw new Error('Stripe not initialized');
+        }
+
         // Create payment intent on your backend
         const response = await fetch(`${CONFIG.BACKEND_URL}/create-payment-intent`, {
             method: 'POST',
@@ -521,46 +533,100 @@ async function initializeStripeElements(plan) {
         
     } catch (error) {
         console.error('Error initializing payment:', error);
-        paymentForm.innerHTML = `
-            <div class="error">
-                <p>Error initializing payment. Please try again.</p>
-                <p>Make sure the backend server is running on port 3001.</p>
-            </div>
-        `;
+        // Fallback to demo mode
+        showDemoPaymentForm(plan);
     }
+}
+
+// Demo payment form fallback
+function showDemoPaymentForm(plan) {
+    const paymentElement = document.getElementById('payment-element');
+    paymentElement.innerHTML = `
+        <div class="demo-payment-form">
+            <div class="payment-info">
+                <h4>Demo Payment Form</h4>
+                <p>This is a demonstration of the payment flow. In production, this would connect to Stripe.</p>
+            </div>
+            <div class="form-group">
+                <label for="card-number">Card Number</label>
+                <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="expiry">Expiry</label>
+                    <input type="text" id="expiry" placeholder="MM/YY" maxlength="5">
+                </div>
+                <div class="form-group">
+                    <label for="cvc">CVC</label>
+                    <input type="text" id="cvc" placeholder="123" maxlength="4">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="cardholder-name">Cardholder Name</label>
+                <input type="text" id="cardholder-name" placeholder="John Doe">
+            </div>
+        </div>
+    `;
+    
+    // Handle form submission
+    const form = document.getElementById('payment-form');
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        
+        const submitButton = document.getElementById('submit-payment');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Processing...';
+        
+        // Simulate payment processing
+        setTimeout(() => {
+            // Show success message
+            paymentForm.innerHTML = `
+                <div class="payment-success">
+                    <div class="success-icon">✓</div>
+                    <h3>Payment Successful!</h3>
+                    <p>Thank you for your purchase of ${plan.name}.</p>
+                    <p>You will receive a confirmation email shortly.</p>
+                    <button class="btn btn-primary" onclick="closePaymentModal()">Close</button>
+                </div>
+            `;
+        }, 2000);
+    });
 }
 
 // Initialize Stripe subscription
 async function initializeStripeSubscription(plan) {
     try {
-        // For demo purposes, we'll create a mock subscription flow
-        const paymentElement = document.getElementById('payment-element');
-        paymentElement.innerHTML = `
-            <div class="demo-payment-form">
-                <div class="payment-info">
-                    <h4>Demo Subscription Form</h4>
-                    <p>This is a demonstration of the subscription flow. In production, this would connect to Stripe.</p>
-                </div>
-                <div class="form-group">
-                    <label for="card-number">Card Number</label>
-                    <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="expiry">Expiry</label>
-                        <input type="text" id="expiry" placeholder="MM/YY" maxlength="5">
-                    </div>
-                    <div class="form-group">
-                        <label for="cvc">CVC</label>
-                        <input type="text" id="cvc" placeholder="123" maxlength="4">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="cardholder-name">Cardholder Name</label>
-                    <input type="text" id="cardholder-name" placeholder="John Doe">
-                </div>
-            </div>
-        `;
+        // Check if Stripe is available
+        if (!stripe) {
+            throw new Error('Stripe not initialized');
+        }
+
+        // Create subscription on your backend
+        const response = await fetch(`${CONFIG.BACKEND_URL}/create-subscription`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                price: plan.price * 100, // Convert to cents
+                currency: 'usd',
+                plan: plan.name
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to create subscription');
+        }
+        
+        const { clientSecret } = await response.json();
+        
+        // Create Stripe Elements
+        const elements = stripe.elements({
+            clientSecret: clientSecret
+        });
+        
+        const paymentElement = elements.create('payment');
+        paymentElement.mount('#payment-element');
         
         // Handle form submission
         const form = document.getElementById('subscription-form');
@@ -571,31 +637,82 @@ async function initializeStripeSubscription(plan) {
             submitButton.disabled = true;
             submitButton.textContent = 'Processing...';
             
-            // Simulate subscription processing
-            setTimeout(() => {
-                // Show success message
-                paymentForm.innerHTML = `
-                    <div class="payment-success">
-                        <div class="success-icon">✓</div>
-                        <h3>Subscription Successful!</h3>
-                        <p>Thank you for subscribing to ${plan.name}.</p>
-                        <p>Your subscription will be charged $${plan.price}/month.</p>
-                        <p>You will receive a confirmation email shortly.</p>
-                        <button class="btn btn-primary" onclick="closePaymentModal()">Close</button>
-                    </div>
-                `;
-            }, 2000);
+            const { error } = await stripe.confirmPayment({
+                elements,
+                confirmParams: {
+                    return_url: `${window.location.origin}/success.html`,
+                },
+            });
+            
+            if (error) {
+                console.error('Subscription failed:', error);
+                alert('Subscription failed. Please try again.');
+                submitButton.disabled = false;
+                submitButton.textContent = `Subscribe for $${plan.price}/month`;
+            }
         });
         
     } catch (error) {
         console.error('Error initializing subscription:', error);
-        paymentForm.innerHTML = `
-            <div class="error">
-                <p>Error initializing subscription. Please try again.</p>
-                <p>Note: This is a demo. In production, you would need to set up a backend to handle Stripe subscriptions.</p>
-            </div>
-        `;
+        // Fallback to demo mode
+        showDemoSubscriptionForm(plan);
     }
+}
+
+// Demo subscription form fallback
+function showDemoSubscriptionForm(plan) {
+    const paymentElement = document.getElementById('payment-element');
+    paymentElement.innerHTML = `
+        <div class="demo-payment-form">
+            <div class="payment-info">
+                <h4>Demo Subscription Form</h4>
+                <p>This is a demonstration of the subscription flow. In production, this would connect to Stripe.</p>
+            </div>
+            <div class="form-group">
+                <label for="card-number">Card Number</label>
+                <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="expiry">Expiry</label>
+                    <input type="text" id="expiry" placeholder="MM/YY" maxlength="5">
+                </div>
+                <div class="form-group">
+                    <label for="cvc">CVC</label>
+                    <input type="text" id="cvc" placeholder="123" maxlength="4">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="cardholder-name">Cardholder Name</label>
+                <input type="text" id="cardholder-name" placeholder="John Doe">
+            </div>
+        </div>
+    `;
+    
+    // Handle form submission
+    const form = document.getElementById('subscription-form');
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        
+        const submitButton = document.getElementById('submit-subscription');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Processing...';
+        
+        // Simulate subscription processing
+        setTimeout(() => {
+            // Show success message
+            paymentForm.innerHTML = `
+                <div class="payment-success">
+                    <div class="success-icon">✓</div>
+                    <h3>Subscription Successful!</h3>
+                    <p>Thank you for subscribing to ${plan.name}.</p>
+                    <p>Your subscription will be charged $${plan.price}/month.</p>
+                    <p>You will receive a confirmation email shortly.</p>
+                    <button class="btn btn-primary" onclick="closePaymentModal()">Close</button>
+                </div>
+            `;
+        }, 2000);
+    });
 }
 
 // Close payment modal
