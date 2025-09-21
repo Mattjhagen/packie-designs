@@ -1051,6 +1051,10 @@ section {
     color: #25d366;
 }
 
+.social-link[href*="discord"]:hover {
+    color: #5865f2;
+}
+
 /* Responsive social links */
 @media (max-width: 768px) {
     .social-links {
