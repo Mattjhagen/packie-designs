@@ -232,6 +232,9 @@ function initializePricingButtons() {
 function initializeContactForm() {
     const contactForm = document.querySelector('.contact-form');
     
+    // Initialize EmailJS (replace with your public key)
+    emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
+    
     contactForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -241,16 +244,30 @@ function initializeContactForm() {
         // Show loading state
         const submitBtn = this.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Sending...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
         submitBtn.disabled = true;
         
-        // Simulate form submission (replace with actual API call)
-        setTimeout(() => {
+        // Send email using EmailJS
+        emailjs.send(EMAILJS_CONFIG.SERVICE_ID, EMAILJS_CONFIG.TEMPLATE_ID, {
+            from_name: data.name,
+            from_email: data.email,
+            subject: data.subject,
+            message: data.message,
+            to_email: EMAILJS_CONFIG.TO_EMAIL
+        })
+        .then(function(response) {
+            console.log('SUCCESS!', response.status, response.text);
             alert('Thank you for your message! I\'ll get back to you soon.');
-            this.reset();
-            submitBtn.textContent = originalText;
+            contactForm.reset();
+        }, function(error) {
+            console.log('FAILED...', error);
+            alert('Sorry, there was an error sending your message. Please try again or contact me directly at matty@pacmacmobile.com');
+        })
+        .finally(function() {
+            // Reset button state
+            submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
-        }, 2000);
+        });
     });
 }
 
