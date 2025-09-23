@@ -297,6 +297,71 @@ body {
     color: white;
 }
 
+/* Credee Button */
+.credee-button {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: 1rem;
+}
+
+.credee-button:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+/* Credee Finance Card */
+.credee-finance-card {
+    border: 2px solid #10b981;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.credee-finance-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.credee-finance-card h4 {
+    color: #065f46;
+    font-weight: 700;
+}
+
+.credee-finance-card .maintenance-price {
+    color: #10b981;
+    font-weight: 700;
+}
+
+.credee-finance-card ul li {
+    color: #374151;
+}
+
+.credee-finance-btn {
+    background: #10b981;
+    border: none;
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.credee-finance-btn:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+}
+
 /* Section Styles */
 section {
     padding: 5rem 0;
@@ -1181,6 +1246,13 @@ section {
 
     .nav-menu.active {
         left: 0;
+    }
+
+    .credee-button {
+        margin-left: 0;
+        margin-top: 1rem;
+        width: 100%;
+        max-width: 200px;
     }
 
     .hero-container {

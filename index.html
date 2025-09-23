@@ -19,6 +19,12 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <!-- EmailJS Configuration -->
     <script src="emailjs-config.js"></script>
+    
+    <!-- Credee Lead Generation Script -->
+    <script src="https://common.credee.com/credee-lead-gen-iframe-live.js"></script>
+    
+    <!-- Credee Finance Script -->
+    <script src="https://testfiles.credee.com/credee-finance.min.js"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -44,6 +50,9 @@
                     <a href="#contact" class="nav-link">Contact</a>
                 </li>
             </ul>
+            <button class="credee-button" data-credee-button-code="prod_689iwtwe1z" data-credee-auth_token="7a0dc836528aca3eaee38e69b562f25e">
+                Get Pre-Approved
+            </button>
             <div class="hamburger">
                 <span class="bar"></span>
                 <span class="bar"></span>
@@ -406,17 +415,23 @@
                         </ul>
                         <button class="btn btn-outline maintenance-btn" data-plan="basic-maintenance">Subscribe</button>
                     </div>
-                    <div class="maintenance-card">
-                        <h4>Premium Maintenance</h4>
-                        <div class="maintenance-price">$300<span>/month</span></div>
+                    <div class="maintenance-card credee-finance-card">
+                        <h4>Get Financed</h4>
+                        <div class="maintenance-price">Flexible<span>Payment Options</span></div>
                         <ul>
-                            <li>Everything in Basic</li>
-                            <li>Performance optimization</li>
-                            <li>Advanced security monitoring</li>
-                            <li>Unlimited content updates</li>
-                            <li>Priority support</li>
+                            <li>Quick approval process</li>
+                            <li>Competitive rates</li>
+                            <li>Flexible terms</li>
+                            <li>No hidden fees</li>
+                            <li>Fast funding</li>
                         </ul>
-                        <button class="btn btn-outline maintenance-btn" data-plan="premium-maintenance">Subscribe</button>
+                        <button class="btn btn-primary credee-finance-btn" 
+                                data-credee-type="finance" 
+                                data-credee-product-code="pc_5eee4049eb56f02bc4412d901d7d240f" 
+                                data-credee-auth_token="f9f3552255ae780065797fd9005f80df" 
+                                data-credee-main-url="https://credee.com/request/">
+                            Get Financed
+                        </button>
                     </div>
                 </div>
             </div>
