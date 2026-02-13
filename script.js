@@ -66,7 +66,6 @@ const inlineDomainResults = document.getElementById('inlineDomainResults');
 document.addEventListener('DOMContentLoaded', function() {
     initializeNavigation();
     initializePricingButtons();
-    initializeContactForm();
     initializeModals();
     initializeDomainSearch();
     initializeInlineDomainSearch();
@@ -228,48 +227,7 @@ function initializePricingButtons() {
     });
 }
 
-// Contact form functionality
-function initializeContactForm() {
-    const contactForm = document.querySelector('.contact-form');
-    
-    // Initialize EmailJS (replace with your public key)
-    emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
-    
-    contactForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        const data = Object.fromEntries(formData);
-        
-        // Show loading state
-        const submitBtn = this.querySelector('button[type="submit"]');
-        const originalText = submitBtn.textContent;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-        submitBtn.disabled = true;
-        
-        // Send email using EmailJS
-        emailjs.send(EMAILJS_CONFIG.SERVICE_ID, EMAILJS_CONFIG.TEMPLATE_ID, {
-            from_name: data.name,
-            from_email: data.email,
-            subject: data.subject,
-            message: data.message,
-            to_email: EMAILJS_CONFIG.TO_EMAIL
-        })
-        .then(function(response) {
-            console.log('SUCCESS!', response.status, response.text);
-            alert('Thank you for your message! I\'ll get back to you soon.');
-            contactForm.reset();
-        }, function(error) {
-            console.log('FAILED...', error);
-            alert('Sorry, there was an error sending your message. Please try again or contact me directly at matty@pacmacmobile.com');
-        })
-        .finally(function() {
-            // Reset button state
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-        });
-    });
-}
+
 
 // Modal functionality
 function initializeModals() {
