@@ -2,6 +2,43 @@ const express = require('express');
 const cors = require('cors');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { checkDomainAvailability } = require('./dynadot-integration');
+const namecom = require('./namecom-integration');
+const fs = require('fs');
+const path = require('path');
+const fse = require('fs-extra');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+
+const DATA_DIR = path.join(__dirname, 'data');
+const SITES_DIR = path.join(__dirname, 'sites');
+
+if (!fs.existsSync(DATA_DIR)) fse.ensureDirSync(DATA_DIR);
+if (!fs.existsSync(SITES_DIR)) fse.ensureDirSync(SITES_DIR);
+
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
+let users = {};
+if (fs.existsSync(USERS_FILE)) {
+    try { users = JSON.parse(fs.readFileSync(USERS_FILE)); } catch (e) { users = {}; }
+}
+
+function saveUsers() {
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+}
+
+function authMiddleware(req, res, next) {
+    const auth = req.headers.authorization;
+    if (!auth) return res.status(401).json({ error: 'Missing authorization header' });
+    const parts = auth.split(' ');
+    if (parts.length !== 2) return res.status(401).json({ error: 'Invalid authorization header' });
+    const token = parts[1];
+    try {
+        const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret');
+        req.user = payload;
+        next();
+    } catch (err) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -113,8 +150,11 @@ app.post('/api/check-domain', async (req, res) => {
         }
 
         // Use the real Dynadot API integration
-        const result = await checkDomainAvailability(domain);
-        res.json(result);
+        const resultDyn = await checkDomainAvailability(domain);
+        // Also check Name.com (best-effort)
+        const resultNamecom = await namecom.checkDomainAvailability(domain);
+
+        res.json({ dynadot: resultDyn, namecom: resultNamecom });
         
     } catch (error) {
         console.error('Error checking domain:', error);
@@ -144,6 +184,99 @@ app.post('/api/create-domain-payment', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+// --- Simple user auth (demo) ---
+app.post('/api/register', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+        if (users[email]) return res.status(400).json({ error: 'User already exists' });
+
+        const hashed = await bcrypt.hash(password, 8);
+        users[email] = { id: Object.keys(users).length + 1, email, password: hashed };
+        saveUsers();
+
+        const token = jwt.sign({ id: users[email].id, email }, process.env.JWT_SECRET || 'dev_secret', { expiresIn: '30d' });
+        res.json({ token });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = users[email];
+        if (!user) return res.status(400).json({ error: 'Invalid credentials' });
+
+        const ok = await bcrypt.compare(password, user.password);
+        if (!ok) return res.status(400).json({ error: 'Invalid credentials' });
+
+        const token = jwt.sign({ id: user.id, email }, process.env.JWT_SECRET || 'dev_secret', { expiresIn: '30d' });
+        res.json({ token });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Create a site (saved to user's workspace) but not yet published
+app.post('/api/site/create', authMiddleware, async (req, res) => {
+    try {
+        const { name, html } = req.body;
+        if (!name || !html) return res.status(400).json({ error: 'Name and html required' });
+
+        const userId = req.user.id;
+        const siteId = `${Date.now()}`; // simple id
+        const sitePath = path.join(SITES_DIR, String(userId), siteId);
+        await fse.ensureDir(sitePath);
+        await fse.writeFile(path.join(sitePath, 'index.html'), html, 'utf8');
+
+        res.json({ siteId, previewUrl: `/published/${userId}/${siteId}/index.html` });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Publish is same as create for now (keeps public file)
+app.post('/api/site/publish', authMiddleware, async (req, res) => {
+    try {
+        const { siteId } = req.body;
+        const userId = req.user.id;
+        const sitePath = path.join(SITES_DIR, String(userId), String(siteId));
+        if (!fs.existsSync(sitePath)) return res.status(404).json({ error: 'Site not found' });
+
+        // public URL
+        const publicUrl = `/published/${userId}/${siteId}/index.html`;
+        res.json({ publicUrl });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Name.com endpoints (proxy to helper)
+app.post('/api/namecom/check', async (req, res) => {
+    try {
+        const { domain } = req.body;
+        if (!domain) return res.status(400).json({ error: 'Domain required' });
+        const result = await namecom.checkDomainAvailability(domain);
+        res.json(result);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/namecom/register', authMiddleware, async (req, res) => {
+    try {
+        const { domain, years, contact } = req.body;
+        const result = await namecom.registerDomain(domain, years, contact);
+        res.json(result);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Serve published static sites
+app.use('/published', express.static(path.join(__dirname, 'sites')));
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
